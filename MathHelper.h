@@ -97,6 +97,16 @@ inline bool operator >(const Vector2& lhs, const Vector2& rhs)
 	return lhs.x > rhs.x && lhs.y > rhs.y;
 }
 
+inline bool operator !=(const Vector2& lhs, const Vector2& rhs)
+{
+	return lhs.x != rhs.x && lhs.y != rhs.y;
+}
+
+inline bool operator ==(const Vector2& lhs, const Vector2& rhs)
+{
+	return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
 inline Vector2 RotateVector(Vector2& vec, float angle)
 {
 	float radAngle = (float)(angle*(DEG_TO_RAD));

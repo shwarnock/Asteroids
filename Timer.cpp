@@ -25,14 +25,12 @@ Timer* Timer::Instance()
 
 void Timer::Release()
 {
-
 	delete sInstance;
 	sInstance = NULL;
 }
 
 Timer::Timer()
 {
-
 	//Using Reset to initialize all the values beside mTimeScale
 	Reset();
 	mTimeScale = 1.0f;

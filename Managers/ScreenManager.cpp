@@ -57,6 +57,11 @@ void ScreenManager::Update()
 			{
 				mCurrentScreen = start;
 			}
+
+			if (mPlayScreen->GameOver())
+			{
+				mCurrentScreen = start;
+			}
 			break;
 	}
 }

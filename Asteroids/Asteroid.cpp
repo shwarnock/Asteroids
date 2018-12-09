@@ -1,9 +1,12 @@
 #include "Asteroid.h"
-#include <iostream>
+#include "../Physics/BoxCollider.h"
+#include "../Managers/PhysicsManager.h"
 
 Asteroid::Asteroid(int side)
 {
 	mTimer = Timer::Instance();
+
+	mSize = SIZE::large;
 
 	mAsteroidTexture = new Texture("Asteroid1.png");
 	mAsteroidTexture->Parent(this);
@@ -16,11 +19,53 @@ Asteroid::Asteroid(int side)
 	coefficient = -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0f + 1.0f)));
 
 	SetStartPos();
+
+	AddCollider(new BoxCollider(mAsteroidTexture->ScaledDimensions()));
+
+	mId = PhysicsManager::Instance()->RegisterEntity(this, PhysicsManager::CollisionLayers::Hostile);
+
+	mCurrentState = spawned;
+}
+
+Asteroid::Asteroid(SIZE size)
+{
+	mTimer = Timer::Instance();
+
+	mSize = size;
+
+	if (size == medium)
+	{
+		mAsteroidTexture = new Texture("Asteroid2.png");
+	} else if (size == small)
+	{
+		mAsteroidTexture = new Texture("Asteroid3.png");
+	}
+
+	mAsteroidTexture->Parent(this);
+	mAsteroidTexture->Pos(VEC2_ZERO);
+
+	mSpeed = 100.0f;
+
+	startSide = START_SIDE(rand() % 4);
+
+	crossedIntoPlayArea = false;
+	coefficient = -1.0 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0f + 1.0f)));
+
+	AddCollider(new BoxCollider(mAsteroidTexture->ScaledDimensions()));
+
+	mId = PhysicsManager::Instance()->RegisterEntity(this, PhysicsManager::CollisionLayers::Hostile);
+
+	mCurrentState = spawned;
 }
 
 Asteroid::~Asteroid()
 {
 	mTimer = NULL;
+
+	PhysicsManager::Instance()->UnregisterEntity(mId);
+
+	delete mAsteroidTexture;
+	mAsteroidTexture = NULL;
 }
 
 void Asteroid::SetStartPos()
@@ -44,6 +89,26 @@ void Asteroid::SetStartPos()
 	}
 }
 
+void Asteroid::Hit(PhysicsEntity* other)
+{
+	mCurrentState = destroyed;
+}
+
+bool Asteroid::IgnoreCollisions()
+{
+	return !Active();
+}
+
+Asteroid::SIZE Asteroid::GetSize()
+{
+	return mSize;
+}
+
+Asteroid::CURRENT_STATE Asteroid::GetCurrentState()
+{
+	return mCurrentState;
+}
+
 void Asteroid::Update()
 {
 	Graphics* mGraphics = Graphics::Instance();
@@ -64,26 +129,28 @@ void Asteroid::Update()
 			break;
 	}
 
-	if (Pos().x > mGraphics->SCREEN_WIDTH + 50.0f)
+	if (Pos().x > mGraphics->SCREEN_WIDTH + OFFSCREEN_BUFFER)
 	{
 		Pos(Vector2(0.0f, Pos().y));
 	} 
-	else if (Pos().x < - 50.0f)
+	else if (Pos().x < -OFFSCREEN_BUFFER)
 	{
-		Pos(Vector2(mGraphics->SCREEN_WIDTH + 50.0f, Pos().y));
+		Pos(Vector2(mGraphics->SCREEN_WIDTH + OFFSCREEN_BUFFER, Pos().y));
 	}
 
-	if (Pos().y > mGraphics->SCREEN_HEIGHT + 50.0f)
+	if (Pos().y > mGraphics->SCREEN_HEIGHT + OFFSCREEN_BUFFER)
 	{
-		Pos(Vector2(Pos().x, -50.0f));
+		Pos(Vector2(Pos().x, -OFFSCREEN_BUFFER));
 	} 
-	else if (Pos().y < -50.0f)
+	else if (Pos().y < -OFFSCREEN_BUFFER)
 	{
-		Pos(Vector2(Pos().x, mGraphics->SCREEN_HEIGHT + 50.0f));
+		Pos(Vector2(Pos().x, mGraphics->SCREEN_HEIGHT + OFFSCREEN_BUFFER));
 	}
 }
 
 void Asteroid::Render()
 {
 	mAsteroidTexture->Render();
+
+	PhysicsEntity::Render();
 }

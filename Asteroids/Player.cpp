@@ -1,5 +1,6 @@
 #include "Player.h"
-#include <math.h>
+#include "../Managers/PhysicsManager.h"
+#include "../Physics/BoxCollider.h"
 
 Player::Player()
 {
@@ -23,6 +24,15 @@ Player::Player()
 	mLives = 3;
 
 	mSpeed = VEC2_ZERO;
+
+	for (int i = 0; i < MAX_BULLETS; ++i)
+	{
+		mBullets[i] = new Bullet();
+	}
+
+	AddCollider(new BoxCollider(Vector2(20.0f, 30.0f)));
+
+	mId = PhysicsManager::Instance()->RegisterEntity(this, PhysicsManager::CollisionLayers::Friendly);
 }
 
 Player::~Player()
@@ -33,11 +43,82 @@ Player::~Player()
 
 	delete mShip;
 	mShip = NULL;
+
+	for (int i = 0; i < MAX_BULLETS; ++i)
+	{
+		delete mBullets[i];
+		mBullets[i] = NULL;
+	}
+
+	PhysicsManager::Instance()->UnregisterEntity(mId);
 }
 
+int Player::GetLives()
+{
+	return mLives;
+}
 
+void Player::Visible(bool visible)
+{
+	mVisible = visible;
+}
 
-void Player::Update()
+bool Player::WasHit()
+{
+	return mWasHit;
+}
+
+void Player::Hit(PhysicsEntity* other)
+{
+	--mLives;
+	mAudio->PlaySFX("bangSmall.wav");
+	mWasHit = true;
+}
+
+void Player::HandleAccelerate()
+{
+	if (mInput->KeyDown(SDL_SCANCODE_UP))
+	{
+		if (mSpeed < maxSpeed)
+		{
+			// Create a normalized vector in the direction of travel
+			Vector2 direction = Vector2(static_cast<float>(sin(2 * M_PI * (Rotation(world) / 360))), static_cast<float>(cos(2 * M_PI * (Rotation(world) / 360))));
+
+			// Add to velocity vector (using minus for y because Direct2D uses 0,0 as the top-left corner instead of bottom-left)
+			mSpeed.x += direction.x * 0.2;
+			mSpeed.y -= direction.y * 0.2;
+		}
+	}
+}
+
+void Player::HandleMovement()
+{
+	Pos(Vector2(Pos().x + mSpeed.x, Pos().y + mSpeed.y));
+
+	//Simplified Stokes Law
+	mSpeed.x = mSpeed.x - mSpeed.x * 0.02;
+	mSpeed.y = mSpeed.y - mSpeed.y * 0.02;
+
+	Graphics* mGraphics = Graphics::Instance();
+
+	if (Pos().x > mGraphics->SCREEN_WIDTH + OFFSCREEN_BUFFER)
+	{
+		Pos(Vector2(0.0f, Pos().y));
+	} else if (Pos().x < -OFFSCREEN_BUFFER)
+	{
+		Pos(Vector2(mGraphics->SCREEN_WIDTH + OFFSCREEN_BUFFER, Pos().y));
+	}
+
+	if (Pos().y > mGraphics->SCREEN_HEIGHT + OFFSCREEN_BUFFER)
+	{
+		Pos(Vector2(Pos().x, -OFFSCREEN_BUFFER));
+	} else if (Pos().y < -OFFSCREEN_BUFFER)
+	{
+		Pos(Vector2(Pos().x, mGraphics->SCREEN_HEIGHT + OFFSCREEN_BUFFER));
+	}
+}
+
+void Player::HandleRotation()
 {
 	if (mInput->KeyDown(SDL_SCANCODE_LEFT))
 	{
@@ -46,22 +127,69 @@ void Player::Update()
 	{
 		Rotation(Rotation(world) + 5.0f);
 	}
+}
 
-	if (mInput->KeyDown(SDL_SCANCODE_UP))
+void Player::HandleFiring()
+{
+	if (mInput->KeyPressed(SDL_SCANCODE_SPACE))
 	{
-		if (mSpeed < maxSpeed)
+ 		for (int i = 0; i < MAX_BULLETS; ++i)
 		{
-			mSpeed += Vector2(5.0f, 5.0f);
+			if(!mBullets[i]->Active())
+			{
+				mBullets[i]->Fire(Pos(), Rotation(world));
+				mAudio->PlaySFX("fire.wav");
+				break;
+			}
 		}
-
-		float radRotation = Rotation(local) * 3.1415f / 180.0f;
-		mCurrentHeading = Vector2(std::sin(radRotation), -std::cos(radRotation));
 	}
+}
 
-	Translate(mCurrentHeading * mSpeed * mTimer->DeltaTime(), world);
+void Player::ResetSpeed()
+{
+	mSpeed = Vector2(0.0f, 0.0f);
+}
+
+void Player::ResetHit()
+{
+	mWasHit = false;
+}
+
+bool Player::IgnoreCollisions()
+{
+	return !mVisible;
+}
+
+void Player::Update()
+{
+	if (Active())
+	{
+		HandleRotation();
+
+		HandleAccelerate();
+
+		HandleMovement();
+
+		HandleFiring();
+
+		for (int i = 0; i < MAX_BULLETS; ++i)
+		{
+			mBullets[i]->Update();
+		}
+	}
 }
 
 void Player::Render()
 {
-	mShip->Render();
+	if (mVisible)
+	{
+		mShip->Render();
+	}
+
+	for (int i = 0; i < MAX_BULLETS; ++i)
+	{
+		mBullets[i]->Render();
+	}
+
+	PhysicsEntity::Render();
 }

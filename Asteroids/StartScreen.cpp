@@ -31,6 +31,9 @@ StartScreen::~StartScreen()
 	mPressStart = NULL;
 	delete mAtari;
 	mAtari = NULL;
+
+	mTimer = NULL;
+	mInput = NULL;
 }
 
 void StartScreen::Render()
