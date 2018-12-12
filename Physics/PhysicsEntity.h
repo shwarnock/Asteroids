@@ -27,8 +27,9 @@ public:
 
 	virtual void Render();
 
-protected: 
 	void AddCollider(Collider* collider, Vector2 localPosition = VEC2_ZERO);
+
+protected:
 	virtual bool IgnoreCollisions();
 };
 

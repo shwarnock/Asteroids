@@ -18,6 +18,30 @@ void PhysicsManager::Release()
 	sInstance = nullptr;
 }
 
+PhysicsManager::CollisionLayers PhysicsManager::GetCollisionLayer(unsigned long mId)
+{
+	for (int i = 0; i < static_cast<unsigned int>(CollisionLayers::MaxLayers); ++i)
+	{
+		for (int j = 0; j < mCollisionLayers[i].size(); ++j)
+		{
+			if (mCollisionLayers[i][j]->GetId() == mId)
+			{
+				switch (i)
+				{
+					case 0:
+						return CollisionLayers::Friendly;
+					case 1:
+						return CollisionLayers::FriendlyProjectiles;
+					case 2:
+						return CollisionLayers::Hostile;
+					case 3:
+						return CollisionLayers::HostileProjectiles;
+				}
+			}
+		}
+	}
+}
+
 void PhysicsManager::SetLayerCollisionMask(CollisionLayers layer, CollisionFlags flags)
 {
 	mLayerMasks[static_cast<unsigned int>(layer)] = bitset<static_cast<unsigned int>(CollisionLayers::MaxLayers)>(static_cast<unsigned int>(flags));

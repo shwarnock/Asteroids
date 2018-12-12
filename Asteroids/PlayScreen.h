@@ -8,30 +8,17 @@
 #include "../Asteroids/Player.h"
 #include "../Managers/AsteroidManager.h"
 #include "ScoreBoard.h"
+#include "Level.h"
 
 class PlayScreen : public GameEntity
 {
-public:
-	enum LEVEL_STATES { running, gameOver };
 
 private:
 	Timer* mTimer;
 	InputManager* mInput;
 	AudioManager* mAudio;
-	AsteroidManager* mAsteroids;
-
-	Texture* mGameOverLabel;
-	bool mGameOver;
-	float mGameOverDelay;
-	float mGameoverTimer;
-	float mGameOverLabelOnScreen;
 
 	Player* mPlayer;
-	bool mPlayerHit;
-	float mPlayerRespawnTimer;
-	float mPlayerRespawnDelay;
-
-	LEVEL_STATES mCurrentState;
 
 	GameEntity* mShips;
 	Texture* mShipTextures[3];
@@ -39,9 +26,15 @@ private:
 
 	ScoreBoard* mPlayerOneScore;
 
-public:
+	Level* mLevel;
+	bool mLevelStarted;
 
-	LEVEL_STATES GetCurrentState();
+	bool mGameStarted;
+
+	float mLevelStartTimer;
+	float mLevelStartDelay;
+
+public:
 
 	bool GameOver();
 
@@ -57,9 +50,7 @@ public:
 	void Update();
 
 private:
-
-	void HandleCollisions();
-	void HandlePlayerDeath();
+	void StartNextLevel();
 };
 #pragma once
 #endif // 

@@ -5,6 +5,7 @@
 #include "../Entities/GameEntity.h"
 #include "AudioManager.h"
 #include <vector>
+#include "../Asteroids/Player.h"
 
 using namespace std;
 
@@ -18,12 +19,16 @@ public:
 
 	AudioManager* mAudio;
 
+	void SetCurrentPlayer(Player* player);
+
 	void Reset();
 
 	void Update();
 	void Render();
 
 private:
+
+	static Player* sPlayer;
 
 	static AsteroidManager* sInstance;
 

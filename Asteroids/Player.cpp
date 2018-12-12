@@ -75,6 +75,28 @@ void Player::Hit(PhysicsEntity* other)
 	mWasHit = true;
 }
 
+void Player::AddScore(int change)
+{
+	mScore += change;
+	if (mScore % 10000 == 0)
+	{
+		++mLives;
+	}
+}
+
+int Player::GetScore()
+{
+	return mScore;
+}
+
+void Player::ReloadBullets()
+{
+	for (int i = 0; i < MAX_BULLETS; ++i)
+	{
+		mBullets[i]->Reload();
+	}
+}
+
 void Player::HandleAccelerate()
 {
 	if (mInput->KeyDown(SDL_SCANCODE_UP))
@@ -176,6 +198,11 @@ void Player::Update()
 		{
 			mBullets[i]->Update();
 		}
+
+		if (mWasHit)
+		{
+			ReloadBullets();
+		}
 	}
 }
 
@@ -190,6 +217,4 @@ void Player::Render()
 	{
 		mBullets[i]->Render();
 	}
-
-	PhysicsEntity::Render();
 }

@@ -4,6 +4,7 @@
 #include "../Entities/Texture.h"
 #include "../Timer.h"
 #include "../Physics/PhysicsEntity.h"
+#include "../Managers/PhysicsManager.h"
 
 class Asteroid : public PhysicsEntity
 {
@@ -13,7 +14,9 @@ public:
 
 private:
 
-	const int OFFSCREEN_BUFFER = 35;
+	PhysicsManager* mPhysics;
+
+	const int OFFSCREEN_BUFFER = 75;
 
 	Timer* mTimer;
 

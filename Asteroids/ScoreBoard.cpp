@@ -37,7 +37,7 @@ void ScoreBoard::Score(int score)
 		{
 			mScore.push_back(new Texture("0", "emulogic.ttf", 32, mColor));
 			mScore[i]->Parent(this);
-			mScore[i]->Pos(VEC2_ZERO);
+			mScore[i]->Pos(Vector2(-32.0f * i, 0.0f));
 		}
 	} 
 	else
@@ -45,11 +45,11 @@ void ScoreBoard::Score(int score)
 		string str = to_string(score);
 		int lastIndex = str.length() - 1;
 
-		for (int i = 0; i < lastIndex; ++i)
+		for (int i = 0; i <= lastIndex; ++i)
 		{
 			mScore.push_back(new Texture(str.substr(i, 1), "emulogic.ttf", 32, mColor));
 			mScore[i]->Parent(this);
-			mScore[i]->Pos(VEC2_ZERO);
+			mScore[i]->Pos(Vector2(-32.0f * (lastIndex - i), 0.0f));
 		}
 	}
 }

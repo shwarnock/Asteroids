@@ -25,6 +25,8 @@ Asteroid::Asteroid(int side)
 	mId = PhysicsManager::Instance()->RegisterEntity(this, PhysicsManager::CollisionLayers::Hostile);
 
 	mCurrentState = spawned;
+
+	mPhysics = PhysicsManager::Instance();
 }
 
 Asteroid::Asteroid(SIZE size)
@@ -56,6 +58,8 @@ Asteroid::Asteroid(SIZE size)
 	mId = PhysicsManager::Instance()->RegisterEntity(this, PhysicsManager::CollisionLayers::Hostile);
 
 	mCurrentState = spawned;
+
+	mPhysics = PhysicsManager::Instance();
 }
 
 Asteroid::~Asteroid()
@@ -91,8 +95,12 @@ void Asteroid::SetStartPos()
 
 void Asteroid::Hit(PhysicsEntity* other)
 {
-	mCurrentState = destroyed;
+	if (mPhysics->GetCollisionLayer(other->GetId()) == PhysicsManager::CollisionLayers::FriendlyProjectiles)
+	{
+		mCurrentState = destroyed;
+	}
 }
+
 
 bool Asteroid::IgnoreCollisions()
 {
@@ -151,6 +159,4 @@ void Asteroid::Update()
 void Asteroid::Render()
 {
 	mAsteroidTexture->Render();
-
-	PhysicsEntity::Render();
 }

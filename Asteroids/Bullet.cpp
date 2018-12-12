@@ -90,8 +90,6 @@ void Bullet::Render()
 	{
 		mBullet->Render();
 	}
-
-	PhysicsEntity::Render();
 }
 
 bool Bullet::IgnoreCollisions()

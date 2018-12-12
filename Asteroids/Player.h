@@ -55,12 +55,17 @@ public:
 	Player();
 	~Player();
 
+	void AddScore(int change);
+	int GetScore();
+
 	void Visible(bool visible);
 
 	void Hit(PhysicsEntity* other) override;
 
 	void ResetHit();
 	void ResetSpeed();
+
+	void ReloadBullets();
 
 	int GetLives();
 
